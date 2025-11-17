@@ -1,0 +1,37 @@
+.amr-container {
+  padding: 30px;
+  background: #f9f9f9;
+  min-height: 100vh;
+}
+
+.amr-upload {
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.amr-table-container {
+  margin-top: 25px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.amr-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.amr-table th {
+  background-color: #004080;
+  color: white;
+  padding: 10px;
+}
+
+.amr-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}

@@ -1,0 +1,150 @@
+/* === LAYOUT STRUCTURE === */
+.wizard-layout {
+  display: flex;
+  min-height: 80vh;
+  background: #f9f9f9;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* === SIDEBAR === */
+.wizard-sidebar {
+  width: 220px;
+  background: #004080;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wizard-sidebar h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #ffcc00;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wizard-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* === STEP BUTTONS === */
+.wizard-step {
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+}
+
+/* Unlocked Step (can be clicked) */
+.unlocked-step {
+  background: #0059b3;
+  color: #fff;
+}
+
+.unlocked-step:hover {
+  background: #0073e6;
+  transform: translateX(3px);
+}
+
+/* Active Step (currently selected) */
+.active-step {
+  background: #ffcc00;
+  color: #000;
+  font-weight: bold;
+  border-left: 4px solid #003366;
+}
+
+/* Locked Step (cannot be clicked yet) */
+.locked-step {
+  background: #003366;
+  color: #aaaaaa;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* === MAIN CONTENT AREA === */
+.wizard-content {
+  flex: 1;
+  padding: 30px;
+  background: white;
+  border-left: 2px solid #ddd;
+  overflow-y: auto;
+}
+
+/* === NAVIGATION BUTTONS === */
+.wizard-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.wizard-nav button {
+  padding: 10px 22px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+/* Hover effect */
+.wizard-nav button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Back button */
+.wizard-nav button:first-child {
+  background: #cccccc;
+  color: #333;
+}
+
+/* Next button */
+.wizard-nav button:nth-child(2) {
+  background: #0073e6;
+  color: white;
+}
+
+/* Submit button */
+.wizard-nav button:last-child {
+  background: #28a745;
+  color: white;
+  font-weight: bold;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .wizard-layout {
+    flex-direction: column;
+  }
+
+  .wizard-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .wizard-sidebar ul {
+    display: flex;
+    gap: 8px;
+  }
+
+  .wizard-step {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .wizard-content {
+    border-left: none;
+    border-top: 2px solid #ddd;
+  }
+}

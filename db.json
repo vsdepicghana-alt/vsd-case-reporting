@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "pin": "210640",
+      "role": "superuser",
+      "name": "Admin",
+      "staffId": "SU-001",
+      "jobDescription": "System Administrator"
+    },
+    {
+      "id": "9979",
+      "name": "David Medulla",
+      "staffId": "1234qwerty",
+      "jobDescription": "Animal Health Officer",
+      "pin": "554488251",
+      "role": "officer"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+.setup-container {
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.setup-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.setup-container label {
+  font-weight: bold;
+}
+
+.setup-container input,
+.setup-container select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0 15px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #008000;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #006400;
+}

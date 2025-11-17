@@ -1,0 +1,100 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import Navbar from "./components/Navbar";
+import HomePage from "./components/HomePage";
+import FormApp from "./FormApp";
+import AMRData from "./components/AMRData";
+
+import Login from "./components/Login";
+import OfficerSetup from "./components/OfficerSetup";
+import CaseSuccess from "./components/CaseSuccess";
+
+// ===== Helper Functions =====
+
+const getUser = () => {
+  const user = localStorage.getItem("loggedUser");
+  return user ? JSON.parse(user) : null;
+};
+
+// Protect normal routes (must be logged in)
+const ProtectedRoute = ({ children }) => {
+  const user = getUser();
+  return user ? children : <Navigate to="/login" replace />;
+};
+
+// Protect superuser-only routes
+const SuperUserRoute = ({ children }) => {
+  const user = getUser();
+  if (!user) return <Navigate to="/login" replace />;
+
+  return user.role === "superuser" ? children : <Navigate to="/" replace />;
+};
+
+function App() {
+  return (
+    <Router>
+      <Navbar />
+
+      <Routes>
+        {/* 🔐 Public Route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* 👑 Superuser only */}
+        <Route
+          path="/officer-setup"
+          element={
+            <SuperUserRoute>
+              <OfficerSetup />
+            </SuperUserRoute>
+          }
+        />
+
+        {/* 🏠 Logged-in users only */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 📝 Case Reporting Form */}
+        <Route
+          path="/case-reporting"
+          element={
+            <ProtectedRoute>
+              <FormApp />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🎉 Case Submitted Page */}
+        <Route
+          path="/case-success"
+          element={
+            <ProtectedRoute>
+              <CaseSuccess />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🧫 AMR Data */}
+        <Route
+          path="/amr-data"
+          element={
+            <ProtectedRoute>
+              <AMRData />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
