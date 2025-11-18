@@ -6,11 +6,25 @@ const IntroAndOfficer = ({
   handleLoadCaseByID,
   readOnly,
 }) => {
-  const [labMode, setLabMode] = useState(""); // "new" | "existing"
+  const [labMode, setLabMode] = useState(""); 
   const [caseIDInput, setCaseIDInput] = useState("");
   const [isLabLocked, setIsLabLocked] = useState(false);
 
-  // Reset lab mode if user changes place of work
+  // Detect logged-in officer
+  const storedUser = JSON.parse(localStorage.getItem("loggedUser") || "null");
+  const officerLoggedIn = storedUser && storedUser.role === "officer";
+
+  // Auto-fill officer details once
+  useEffect(() => {
+    if (officerLoggedIn && storedUser) {
+      updateFormData("officerId", storedUser.staffId || "");
+      updateFormData("officerName", storedUser.name || "");
+      updateFormData("jobDescription", storedUser.jobDescription || "");
+      updateFormData("contactNumber", storedUser.contactNumber || "");
+    }
+  }, [officerLoggedIn, storedUser]);
+
+  // Reset lab mode if place of work changes
   useEffect(() => {
     if (formData.placeOfWork !== "laboratory") {
       setLabMode("");
@@ -18,7 +32,7 @@ const IntroAndOfficer = ({
     }
   }, [formData.placeOfWork]);
 
-  // When labMode changes, update form lock
+  // Lock fields until laboratory picks a mode
   useEffect(() => {
     if (formData.placeOfWork === "laboratory") {
       setIsLabLocked(labMode === "");
@@ -38,18 +52,18 @@ const IntroAndOfficer = ({
   return (
     <section className="form-section">
       <h2>📋 Introduction</h2>
+
       <p>
         This initiative, led by the <b>Veterinary Services Directorate</b> in
         collaboration with <b>EpiC Ghana</b>, aims to establish a comprehensive
-        surveillance system for six prioritized zoonotic diseases in Ghana:
-        Rabies, Tuberculosis, Viral Haemorrhagic Fevers, Anthrax, Avian
-        Influenza, and Trypanosomiasis.
+        surveillance system for six prioritized zoonotic diseases.
       </p>
 
       <h3> Reporting Officer</h3>
 
-      {/* Officer Info Grid */}
+      {/* ---------------- OFFICER DETAILS ---------------- */}
       <div className="form-grid">
+
         {/* Officer ID */}
         <div className="form-field">
           <label>Officer ID *</label>
@@ -59,7 +73,7 @@ const IntroAndOfficer = ({
             value={formData.officerId || ""}
             onChange={(e) => updateFormData("officerId", e.target.value)}
             required
-            disabled={readOnly || isLabLocked}
+            disabled={officerLoggedIn || readOnly || isLabLocked}
           />
         </div>
 
@@ -72,7 +86,7 @@ const IntroAndOfficer = ({
             value={formData.officerName || ""}
             onChange={(e) => updateFormData("officerName", e.target.value)}
             required
-            disabled={readOnly || isLabLocked}
+            disabled={officerLoggedIn || readOnly || isLabLocked}
           />
         </div>
 
@@ -84,14 +98,12 @@ const IntroAndOfficer = ({
             value={formData.jobDescription || ""}
             onChange={(e) => updateFormData("jobDescription", e.target.value)}
             required
-            disabled={readOnly || isLabLocked}
+            disabled={officerLoggedIn || readOnly || isLabLocked}
           >
             <option value="">-- Select Job --</option>
             <option value="veterinarian">Veterinarian</option>
             <option value="technologist">Technologist</option>
-            <option value="animal_health_officer">
-              Animal Health Officer
-            </option>
+            <option value="animal_health_officer">Animal Health Officer</option>
           </select>
         </div>
 
@@ -105,12 +117,12 @@ const IntroAndOfficer = ({
             onChange={(e) => updateFormData("contactNumber", e.target.value)}
             placeholder="e.g. 0241231234"
             required
-            disabled={readOnly || isLabLocked}
+            disabled={officerLoggedIn || readOnly || isLabLocked}
           />
         </div>
       </div>
 
-      {/* Place of Work */}
+      {/* ---------------- PLACE OF WORK ---------------- */}
       <div className="form-field" style={{ marginTop: "1rem" }}>
         <label>Place of Work *</label>
         <select
@@ -128,10 +140,9 @@ const IntroAndOfficer = ({
           <option value="others">Others</option>
         </select>
 
-        {/* If "others" */}
         {formData.placeOfWork === "others" && (
           <>
-            <label>If others, kindly specify *</label>
+            <label>If others, please specify *</label>
             <input
               type="text"
               name="otherPlace"
@@ -144,7 +155,7 @@ const IntroAndOfficer = ({
         )}
       </div>
 
-      {/* 🧪 Laboratory Mode Options */}
+      {/* ---------------- LABORATORY WORKFLOW ---------------- */}
       {formData.placeOfWork === "laboratory" && (
         <div
           className="lab-options"
@@ -159,21 +170,12 @@ const IntroAndOfficer = ({
           <h4>Laboratory Workflow</h4>
           <p>Select how you want to proceed:</p>
 
-          {/* Buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              marginTop: "0.5rem",
-              marginBottom: "1rem",
-            }}
-          >
+          <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
             <button
               type="button"
               onClick={() => setLabMode("new")}
               style={{
-                background:
-                  labMode === "new" ? "#007bff" : "rgba(0,0,0,0.05)",
+                background: labMode === "new" ? "#007bff" : "#eee",
                 color: labMode === "new" ? "#fff" : "#000",
               }}
             >
@@ -184,8 +186,7 @@ const IntroAndOfficer = ({
               type="button"
               onClick={() => setLabMode("existing")}
               style={{
-                background:
-                  labMode === "existing" ? "#007bff" : "rgba(0,0,0,0.05)",
+                background: labMode === "existing" ? "#007bff" : "#eee",
                 color: labMode === "existing" ? "#fff" : "#000",
               }}
             >
@@ -193,7 +194,6 @@ const IntroAndOfficer = ({
             </button>
           </div>
 
-          {/* If “existing” mode, show input for Case ID */}
           {labMode === "existing" && (
             <div className="case-id-loader">
               <label>Enter Case ID:</label>
@@ -217,11 +217,9 @@ const IntroAndOfficer = ({
         </div>
       )}
 
-      {/* Disable info message when lab hasn't selected mode */}
       {formData.placeOfWork === "laboratory" && labMode === "" && (
         <p style={{ color: "#c00", marginTop: "10px" }}>
-          ⚠️ Please select “Input New Case Data” or “Load Case via Case ID” to
-          continue.
+          ⚠️ Please select “Input New Case Data” or “Load Case via Case ID”.
         </p>
       )}
     </section>
