@@ -6,23 +6,23 @@ const IntroAndOfficer = ({
   handleLoadCaseByID,
   readOnly,
 }) => {
-  const [labMode, setLabMode] = useState(""); 
+  const [labMode, setLabMode] = useState("");
   const [caseIDInput, setCaseIDInput] = useState("");
   const [isLabLocked, setIsLabLocked] = useState(false);
 
-  // Detect logged-in officer
-  const storedUser = JSON.parse(localStorage.getItem("loggedUser") || "null");
-  const officerLoggedIn = storedUser && storedUser.role === "officer";
+  // 🔐 Get currently logged user
+  const loggedUser = JSON.parse(localStorage.getItem("loggedUser") || "null");
+  const isOfficer = loggedUser?.role === "officer";
 
-  // Auto-fill officer details once
+  // ⭐ AUTO-FILL OFFICER DETAILS (runs once)
   useEffect(() => {
-    if (officerLoggedIn && storedUser) {
-      updateFormData("officerId", storedUser.staffId || "");
-      updateFormData("officerName", storedUser.name || "");
-      updateFormData("jobDescription", storedUser.jobDescription || "");
-      updateFormData("contactNumber", storedUser.contactNumber || "");
+    if (isOfficer && loggedUser) {
+      updateFormData("officerId", loggedUser.staffId || "");
+      updateFormData("officerName", loggedUser.name || "");
+      updateFormData("jobDescription", loggedUser.jobDescription || "");
+      updateFormData("contactNumber", loggedUser.contactNumber || "");
     }
-  }, [officerLoggedIn, storedUser]);
+  }, []); // runs only once on page load
 
   // Reset lab mode if place of work changes
   useEffect(() => {
@@ -32,7 +32,7 @@ const IntroAndOfficer = ({
     }
   }, [formData.placeOfWork]);
 
-  // Lock fields until laboratory picks a mode
+  // Lock fields in lab mode until selection made
   useEffect(() => {
     if (formData.placeOfWork === "laboratory") {
       setIsLabLocked(labMode === "");
@@ -63,17 +63,15 @@ const IntroAndOfficer = ({
 
       {/* ---------------- OFFICER DETAILS ---------------- */}
       <div className="form-grid">
-
         {/* Officer ID */}
         <div className="form-field">
           <label>Officer ID *</label>
           <input
             type="text"
-            name="officerId"
             value={formData.officerId || ""}
             onChange={(e) => updateFormData("officerId", e.target.value)}
             required
-            disabled={officerLoggedIn || readOnly || isLabLocked}
+            disabled={isOfficer || readOnly || isLabLocked}
           />
         </div>
 
@@ -82,11 +80,10 @@ const IntroAndOfficer = ({
           <label>Officer Name *</label>
           <input
             type="text"
-            name="officerName"
             value={formData.officerName || ""}
             onChange={(e) => updateFormData("officerName", e.target.value)}
             required
-            disabled={officerLoggedIn || readOnly || isLabLocked}
+            disabled={isOfficer || readOnly || isLabLocked}
           />
         </div>
 
@@ -94,11 +91,10 @@ const IntroAndOfficer = ({
         <div className="form-field">
           <label>Job Description *</label>
           <select
-            name="jobDescription"
             value={formData.jobDescription || ""}
             onChange={(e) => updateFormData("jobDescription", e.target.value)}
             required
-            disabled={officerLoggedIn || readOnly || isLabLocked}
+            disabled={isOfficer || readOnly || isLabLocked}
           >
             <option value="">-- Select Job --</option>
             <option value="veterinarian">Veterinarian</option>
@@ -112,12 +108,11 @@ const IntroAndOfficer = ({
           <label>Contact Number *</label>
           <input
             type="tel"
-            name="contactNumber"
             value={formData.contactNumber || ""}
             onChange={(e) => updateFormData("contactNumber", e.target.value)}
             placeholder="e.g. 0241231234"
             required
-            disabled={officerLoggedIn || readOnly || isLabLocked}
+            disabled={isOfficer || readOnly || isLabLocked}
           />
         </div>
       </div>
@@ -126,7 +121,6 @@ const IntroAndOfficer = ({
       <div className="form-field" style={{ marginTop: "1rem" }}>
         <label>Place of Work *</label>
         <select
-          name="placeOfWork"
           value={formData.placeOfWork || ""}
           onChange={(e) => updateFormData("placeOfWork", e.target.value)}
           required
@@ -145,7 +139,6 @@ const IntroAndOfficer = ({
             <label>If others, please specify *</label>
             <input
               type="text"
-              name="otherPlace"
               value={formData.otherPlace || ""}
               onChange={(e) => updateFormData("otherPlace", e.target.value)}
               required
@@ -170,7 +163,7 @@ const IntroAndOfficer = ({
           <h4>Laboratory Workflow</h4>
           <p>Select how you want to proceed:</p>
 
-          <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+          <div style={{ display: "flex", gap: "1rem" }}>
             <button
               type="button"
               onClick={() => setLabMode("new")}
@@ -195,7 +188,7 @@ const IntroAndOfficer = ({
           </div>
 
           {labMode === "existing" && (
-            <div className="case-id-loader">
+            <div className="case-id-loader" style={{ marginTop: "1rem" }}>
               <label>Enter Case ID:</label>
               <input
                 type="text"

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-// 🌍 Use your live Render API here
+// 🌍 Use your live Render API
 const API_BASE = "https://vsd-api.onrender.com";
 
 const Login = () => {
@@ -15,11 +15,11 @@ const Login = () => {
     setError("");
 
     try {
-      // Fetch user by PIN from Render API
+      // Fetch user by PIN
       const response = await fetch(`${API_BASE}/users?pin=${pin}`);
-      
+
       if (!response.ok) {
-        throw new Error("Network response not OK");
+        throw new Error("❌ Server response not OK");
       }
 
       const data = await response.json();
@@ -31,19 +31,19 @@ const Login = () => {
 
       const user = data[0];
 
-      // Store logged-in user
+      // Store logged in user
       localStorage.setItem("loggedUser", JSON.stringify(user));
 
-      // Redirect based on role
+      // Navigate based on role
       if (user.role === "superuser") {
         navigate("/officer-setup");
       } else {
-        navigate("/"); // Officer goes to homepage
+        navigate("/"); // officer → homepage
       }
 
     } catch (err) {
       console.error("Login error:", err);
-      setError("❌ Server error. Please try again.");
+      setError("❌ Could not connect to server. Try again.");
     }
   };
 

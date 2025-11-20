@@ -6,7 +6,8 @@
       "role": "superuser",
       "name": "Admin",
       "staffId": "SU-001",
-      "jobDescription": "System Administrator"
+      "jobDescription": "System Administrator",
+      "contactNumber": ""
     },
     {
       "id": "9979",
@@ -14,7 +15,8 @@
       "staffId": "1234qwerty",
       "jobDescription": "Animal Health Officer",
       "pin": "554488251",
-      "role": "officer"
+      "role": "officer",
+      "contactNumber": ""
     }
   ]
 }

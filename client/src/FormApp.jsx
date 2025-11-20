@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";   // ✅ NEW
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import WizardLayout from "./components/WizardLayout";
 import IntroAndOfficer from "./components/FormSections/IntroAndOfficer";
 import GeneralCase from "./components/FormSections/GeneralCase";
@@ -13,7 +13,7 @@ import emailjs from "@emailjs/browser";
 import "./styles.css";
 
 function FormApp() {
-  const navigate = useNavigate();   // ✅ Navigation hook
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     officerId: "",
@@ -51,7 +51,18 @@ function FormApp() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
 
-  /** Update any field */
+  // ⭐⭐⭐ AUTO-FILL OFFICER DETAILS AFTER LOGIN ⭐⭐⭐
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("loggedUser"));
+    if (user) {
+      updateFormData("officerId", user.staffId);
+      updateFormData("officerName", user.name);
+      updateFormData("jobDescription", user.jobDescription);
+      updateFormData("contactNumber", user.contactNumber);
+    }
+  }, []);
+
+  /** Update a single field */
   const updateFormData = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
@@ -114,9 +125,10 @@ function FormApp() {
   const validateStep = (stepId) => {
     if (stepId === "lab" && formData.placeOfWork !== "laboratory") return true;
 
-    const fields = stepId === "lab"
-      ? ["labSampleType", "labTest", "labResult"]
-      : requiredFields[stepId] || [];
+    const fields =
+      stepId === "lab"
+        ? ["labSampleType", "labTest", "labResult"]
+        : requiredFields[stepId] || [];
 
     for (const field of fields) {
       const value = formData[field];
@@ -134,7 +146,7 @@ function FormApp() {
     return true;
   };
 
-  /** Send referral email — ALWAYS with CaseID */
+  /** Send sample referral email with Case ID */
   const sendReferralEmail = async (caseRecord) => {
     if (!caseRecord.sendToLab || caseRecord.sendToLab.toLowerCase() !== "yes") {
       return;
@@ -180,25 +192,70 @@ function FormApp() {
     }
   };
 
-  /** Step components */
+  /** Step definitions */
   const steps = [
-    { id: "intro", label: "Introduction", component: <IntroAndOfficer formData={formData} updateFormData={updateFormData} handleLoadCaseByID={handleLoadCaseByID} readOnly={readOnly} /> },
-    { id: "general", label: "General Case Info", component: <GeneralCase formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
-    { id: "animal", label: "Animal Information", component: <AnimalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
-    { id: "clinical", label: "Clinical & Classification", component: <ClinicalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
+    {
+      id: "intro",
+      label: "Introduction",
+      component: (
+        <IntroAndOfficer
+          formData={formData}
+          updateFormData={updateFormData}
+          handleLoadCaseByID={handleLoadCaseByID}
+          readOnly={readOnly}
+        />
+      ),
+    },
+    {
+      id: "general",
+      label: "General Case Info",
+      component: <GeneralCase formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
+    },
+    {
+      id: "animal",
+      label: "Animal Information",
+      component: <AnimalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
+    },
+    {
+      id: "clinical",
+      label: "Clinical & Classification",
+      component: <ClinicalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
+    },
 
     ...(formData.placeOfWork === "laboratory"
-      ? [{ id: "lab", label: "Lab & Diagnostics", component: <LabDiagnostics formData={formData} updateFormData={updateFormData} readOnly={false} /> }]
+      ? [
+          {
+            id: "lab",
+            label: "Lab & Diagnostics",
+            component: <LabDiagnostics formData={formData} updateFormData={updateFormData} readOnly={false} />,
+          },
+        ]
       : []),
 
-    { id: "control", label: "Control Measures", component: <ControlMeasures formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
+    {
+      id: "control",
+      label: "Control Measures",
+      component: <ControlMeasures formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
+    },
 
     ...(formData.placeOfWork !== "laboratory"
-      ? [{ id: "referral", label: "Sample Referral", component: <SampleReferral formData={formData} updateFormData={updateFormData} /> }]
+      ? [
+          {
+            id: "referral",
+            label: "Sample Referral",
+            component: <SampleReferral formData={formData} updateFormData={updateFormData} />,
+          },
+        ]
       : []),
 
     ...(formData.placeOfWork === "abattoir" || formData.placeOfWork === "laboratory"
-      ? [{ id: "postmortem", label: "Post Mortem Lesions", component: <PostMortemLesions formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> }]
+      ? [
+          {
+            id: "postmortem",
+            label: "Post Mortem Lesions",
+            component: <PostMortemLesions formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
+          },
+        ]
       : []),
   ];
 
@@ -208,13 +265,13 @@ function FormApp() {
     if (!validateStep(stepId)) return;
 
     setCompletedSteps((prev) => [...new Set([...prev, stepId])]);
+
     if (currentStep + 1 < steps.length) setCurrentStep(currentStep + 1);
   };
 
-  const goBack = () =>
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  /** FINAL SUBMIT */
+  /** Final Submit */
   const handleSubmit = async () => {
     let caseID = formData.caseID;
 
@@ -228,7 +285,6 @@ function FormApp() {
     saveCase(caseRecord);
     await sendReferralEmail(caseRecord);
 
-    // 🚀 Redirect to success page
     navigate("/case-success", {
       state: {
         caseID,
@@ -249,12 +305,8 @@ function FormApp() {
 
       <div className="wizard-nav">
         {currentStep > 0 && <button onClick={goBack}>← Back</button>}
-        {currentStep < steps.length - 1 && (
-          <button onClick={goNext}>Next →</button>
-        )}
-        {currentStep === steps.length - 1 && (
-          <button onClick={handleSubmit}>Submit Case</button>
-        )}
+        {currentStep < steps.length - 1 && <button onClick={goNext}>Next →</button>}
+        {currentStep === steps.length - 1 && <button onClick={handleSubmit}>Submit Case</button>}
       </div>
     </WizardLayout>
   );

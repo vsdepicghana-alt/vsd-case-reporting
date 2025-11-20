@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import "./OfficerSetup.css";
 
-// 🌍 Your Render API URL
+// 🌍 Render API URL
 const API_BASE = "https://vsd-api.onrender.com";
 
 const OfficerSetup = () => {
   const [name, setName] = useState("");
   const [staffId, setStaffId] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  const [contactNumber, setContactNumber] = useState("");   // ✅ NEW
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
 
@@ -15,10 +16,12 @@ const OfficerSetup = () => {
     e.preventDefault();
     setMessage("");
 
+    // ✨ Construct officer object
     const newOfficer = {
       name,
       staffId,
       jobDescription,
+      contactNumber,   // ✅ ADDED
       pin,
       role: "officer",
     };
@@ -36,11 +39,13 @@ const OfficerSetup = () => {
 
       setMessage("✅ Officer account created successfully!");
 
-      // Clear form
+      // Clear form fields after success
       setName("");
       setStaffId("");
       setJobDescription("");
+      setContactNumber("");   // ✅ CLEAR
       setPin("");
+
     } catch (err) {
       console.error("Officer creation error:", err);
       setMessage("❌ Server error. Please try again.");
@@ -52,6 +57,7 @@ const OfficerSetup = () => {
       <h2>👨‍💼 Superuser – Create Officer Account</h2>
 
       <form onSubmit={handleCreateOfficer} className="setup-form">
+
         <label>Officer Name</label>
         <input
           value={name}
@@ -73,6 +79,15 @@ const OfficerSetup = () => {
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder="e.g. Field Technician, District Vet Officer"
+          required
+        />
+
+        {/* 📞 CONTACT NUMBER FIELD */}
+        <label>Contact Number</label>
+        <input
+          value={contactNumber}
+          onChange={(e) => setContactNumber(e.target.value)}
+          placeholder="Enter phone number"
           required
         />
 
