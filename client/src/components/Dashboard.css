@@ -1,0 +1,114 @@
+/* ===============================
+   DASHBOARD GLOBAL LAYOUT
+================================== */
+
+.dashboard-container {
+  padding: 2rem;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1a3d7c;
+}
+
+
+/* ===============================
+   GRID LAYOUT FOR CARDS + CHARTS
+================================== */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+
+/* ===============================
+   ANALYTICS CARDS
+================================== */
+
+.dashboard-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #007bff;
+}
+
+
+/* ===============================
+   CHART BOX
+================================== */
+
+.chart-box {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  min-height: 360px;
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+
+/* ===============================
+   FILTERS AREA
+================================== */
+
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.95rem;
+}
+
+
+/* ===============================
+   RESPONSIVE STYLING
+================================== */
+
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
