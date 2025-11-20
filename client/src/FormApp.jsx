@@ -148,7 +148,7 @@ function FormApp() {
       "Takoradi Veterinary Lab": "oseibright172@gmail.com",
       "Kumasi Veterinary Lab": "owususekyeresmith@gmail.com",
       "Accra Veterinary Lab": "kutamemark@gmail.com",
-      "Central Veterinary Lab Pong Tamale": "boatprince01@gmail.com",
+      "Central Veterinary Lab Pong Tamale": "davidmedulla5@gmail.com",
     };
 
     const to_email = labEmails[caseRecord.selectedLab];
