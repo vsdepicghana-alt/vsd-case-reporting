@@ -9,6 +9,7 @@ import AMRData from "./components/AMRData";
 import Login from "./components/Login";
 import OfficerSetup from "./components/OfficerSetup";
 import CaseSuccess from "./components/CaseSuccess";
+import Dashboard from "./components/Dashboard";   // ✅ NEW
 
 // ===== Helper Functions =====
 
@@ -17,7 +18,7 @@ const getUser = () => {
   return user ? JSON.parse(user) : null;
 };
 
-// Protect normal routes (must be logged in)
+// Protect normal logged-in routes
 const ProtectedRoute = ({ children }) => {
   const user = getUser();
   return user ? children : <Navigate to="/login" replace />;
@@ -37,10 +38,10 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* 🔐 Public Route */}
+        {/* 🔐 Public Login Route */}
         <Route path="/login" element={<Login />} />
 
-        {/* 👑 Superuser only */}
+        {/* 👑 Superuser Panel */}
         <Route
           path="/officer-setup"
           element={
@@ -50,7 +51,7 @@ function App() {
           }
         />
 
-        {/* 🏠 Logged-in users only */}
+        {/* 🏠 Home — Normal Users */}
         <Route
           path="/"
           element={
@@ -70,7 +71,7 @@ function App() {
           }
         />
 
-        {/* 🎉 Case Submitted Page */}
+        {/* 🎉 Success Page */}
         <Route
           path="/case-success"
           element={
@@ -90,7 +91,17 @@ function App() {
           }
         />
 
-        {/* Default fallback */}
+        {/* 📊 Dashboard (NEW) */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
