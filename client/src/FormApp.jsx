@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";  
 import WizardLayout from "./components/WizardLayout";
 import IntroAndOfficer from "./components/FormSections/IntroAndOfficer";
 import GeneralCase from "./components/FormSections/GeneralCase";
@@ -51,23 +51,15 @@ function FormApp() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
 
-  // ⭐⭐⭐ AUTO-FILL OFFICER DETAILS AFTER LOGIN ⭐⭐⭐
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("loggedUser"));
-    if (user) {
-      updateFormData("officerId", user.staffId);
-      updateFormData("officerName", user.name);
-      updateFormData("jobDescription", user.jobDescription);
-      updateFormData("contactNumber", user.contactNumber);
-    }
+  /** ✅ Netlify-safe stable update function */
+  const updateFormData = useCallback((key, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   }, []);
 
-  /** Update a single field */
-  const updateFormData = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
-
-  /** Generate CaseID */
+  /** Generate Case ID */
   const generateCaseID = () => {
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
@@ -91,7 +83,7 @@ function FormApp() {
     return `${region}-${district}-${dateStr}-${String(newCount).padStart(3, "0")}`;
   };
 
-  /** Load CaseID */
+  /** Load Case by ID */
   const handleLoadCaseByID = (caseID) => {
     const storedCases = JSON.parse(localStorage.getItem("cases") || "{}");
     const caseData = storedCases[caseID];
@@ -121,9 +113,11 @@ function FormApp() {
     clinical: ["onsetDate", "caseClassification"],
   };
 
-  /** Step validation */
+  /** Validate each step */
   const validateStep = (stepId) => {
-    if (stepId === "lab" && formData.placeOfWork !== "laboratory") return true;
+    if (stepId === "lab" && formData.placeOfWork !== "laboratory") {
+      return true;
+    }
 
     const fields =
       stepId === "lab"
@@ -146,11 +140,9 @@ function FormApp() {
     return true;
   };
 
-  /** Send sample referral email with Case ID */
+  /** Email referral to lab */
   const sendReferralEmail = async (caseRecord) => {
-    if (!caseRecord.sendToLab || caseRecord.sendToLab.toLowerCase() !== "yes") {
-      return;
-    }
+    if (!caseRecord.sendToLab || caseRecord.sendToLab.toLowerCase() !== "yes") return;
 
     const labEmails = {
       "Takoradi Veterinary Lab": "oseibright172@gmail.com",
@@ -162,10 +154,10 @@ function FormApp() {
     const to_email = labEmails[caseRecord.selectedLab];
     if (!to_email) return;
 
+    // Ensure we ALWAYS have a CaseID
     if (!caseRecord.caseID || caseRecord.caseID.trim() === "") {
-      const newID = generateCaseID();
-      caseRecord.caseID = newID;
-      updateFormData("caseID", newID);
+      caseRecord.caseID = generateCaseID();
+      updateFormData("caseID", caseRecord.caseID);
     }
 
     const payload = {
@@ -192,7 +184,7 @@ function FormApp() {
     }
   };
 
-  /** Step definitions */
+  /** Steps */
   const steps = [
     {
       id: "intro",
@@ -227,7 +219,13 @@ function FormApp() {
           {
             id: "lab",
             label: "Lab & Diagnostics",
-            component: <LabDiagnostics formData={formData} updateFormData={updateFormData} readOnly={false} />,
+            component: (
+              <LabDiagnostics
+                formData={formData}
+                updateFormData={updateFormData}
+                readOnly={false}
+              />
+            ),
           },
         ]
       : []),
@@ -253,7 +251,9 @@ function FormApp() {
           {
             id: "postmortem",
             label: "Post Mortem Lesions",
-            component: <PostMortemLesions formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
+            component: (
+              <PostMortemLesions formData={formData} updateFormData={updateFormData} readOnly={readOnly} />
+            ),
           },
         ]
       : []),
@@ -265,13 +265,12 @@ function FormApp() {
     if (!validateStep(stepId)) return;
 
     setCompletedSteps((prev) => [...new Set([...prev, stepId])]);
-
     if (currentStep + 1 < steps.length) setCurrentStep(currentStep + 1);
   };
 
   const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  /** Final Submit */
+  /** Submit */
   const handleSubmit = async () => {
     let caseID = formData.caseID;
 
@@ -305,8 +304,12 @@ function FormApp() {
 
       <div className="wizard-nav">
         {currentStep > 0 && <button onClick={goBack}>← Back</button>}
-        {currentStep < steps.length - 1 && <button onClick={goNext}>Next →</button>}
-        {currentStep === steps.length - 1 && <button onClick={handleSubmit}>Submit Case</button>}
+        {currentStep < steps.length - 1 && (
+          <button onClick={goNext}>Next →</button>
+        )}
+        {currentStep === steps.length - 1 && (
+          <button onClick={handleSubmit}>Submit Case</button>
+        )}
       </div>
     </WizardLayout>
   );

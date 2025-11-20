@@ -14,7 +14,7 @@ const IntroAndOfficer = ({
   const loggedUser = JSON.parse(localStorage.getItem("loggedUser") || "null");
   const isOfficer = loggedUser?.role === "officer";
 
-  // ⭐ AUTO-FILL OFFICER DETAILS (runs once)
+  // ⭐ AUTO-FILL OFFICER DETAILS (Netlify-safe: includes deps)
   useEffect(() => {
     if (isOfficer && loggedUser) {
       updateFormData("officerId", loggedUser.staffId || "");
@@ -22,7 +22,7 @@ const IntroAndOfficer = ({
       updateFormData("jobDescription", loggedUser.jobDescription || "");
       updateFormData("contactNumber", loggedUser.contactNumber || "");
     }
-  }, []); // runs only once on page load
+  }, [isOfficer, loggedUser, updateFormData]);
 
   // Reset lab mode if place of work changes
   useEffect(() => {
@@ -63,6 +63,7 @@ const IntroAndOfficer = ({
 
       {/* ---------------- OFFICER DETAILS ---------------- */}
       <div className="form-grid">
+
         {/* Officer ID */}
         <div className="form-field">
           <label>Officer ID *</label>
