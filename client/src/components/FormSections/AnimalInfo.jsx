@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const AnimalInfo = ({ formData, updateFormData }) => {
   // Handle checkbox (species)
@@ -14,6 +14,15 @@ const AnimalInfo = ({ formData, updateFormData }) => {
     const updatedAges = { ...(formData.ages || {}), [species]: value };
     updateFormData("ages", updatedAges);
   };
+
+  // 🔁 Clear vaccination status if Rabies is NOT selected
+  useEffect(() => {
+    if (!formData.priorityDiseases?.includes("rabies")) {
+      if (formData.vaccinationStatus) {
+        updateFormData("vaccinationStatus", "");
+      }
+    }
+  }, [formData.priorityDiseases, formData.vaccinationStatus, updateFormData]);
 
   return (
     <section className="form-section">
@@ -66,6 +75,7 @@ const AnimalInfo = ({ formData, updateFormData }) => {
             required
           >
             <option value="">-- Select Age --</option>
+
             {sp === "cattle" && (
               <>
                 <option value="birth_6m">Birth – 6 months</option>
@@ -73,20 +83,15 @@ const AnimalInfo = ({ formData, updateFormData }) => {
                 <option value="18_plus">&gt; 18 months</option>
               </>
             )}
-            {sp === "goat" && (
+
+            {["goat", "sheep", "dog", "cat"].includes(sp) && (
               <>
                 <option value="birth_6m">Birth – 6 months</option>
                 <option value="6_12m">6 – 12 months</option>
                 <option value="12_plus">&gt; 12 months</option>
               </>
             )}
-            {sp === "sheep" && (
-              <>
-                <option value="birth_6m">Birth – 6 months</option>
-                <option value="6_12m">6 – 12 months</option>
-                <option value="12_plus">&gt; 12 months</option>
-              </>
-            )}
+
             {sp === "pig" && (
               <>
                 <option value="birth_8w">Birth – 8 weeks</option>
@@ -95,20 +100,7 @@ const AnimalInfo = ({ formData, updateFormData }) => {
                 <option value="8_plus">&gt; 8 months</option>
               </>
             )}
-            {sp === "dog" && (
-              <>
-                <option value="birth_6m">Birth – 6 months</option>
-                <option value="6_12m">6 – 12 months</option>
-                <option value="12_plus">&gt; 12 months</option>
-              </>
-            )}
-            {sp === "cat" && (
-              <>
-                <option value="birth_6m">Birth – 6 months</option>
-                <option value="6_12m">6 – 12 months</option>
-                <option value="12_plus">&gt; 12 months</option>
-              </>
-            )}
+
             {sp === "poultry" && (
               <>
                 <option value="dayold_6w">Day Old – 6 weeks</option>
@@ -116,8 +108,9 @@ const AnimalInfo = ({ formData, updateFormData }) => {
                 <option value="20_plus">&gt; 20 weeks</option>
               </>
             )}
+
             {sp === "others" && (
-              <option value="custom">Custom (enter manually later)</option>
+              <option value="custom">Custom</option>
             )}
           </select>
         </div>
@@ -140,19 +133,25 @@ const AnimalInfo = ({ formData, updateFormData }) => {
           </>
         )}
 
-      {/* Vaccination Status */}
-      <label>Vaccination Status *</label>
-      <select
-        value={formData.vaccinationStatus || ""}
-        onChange={(e) => updateFormData("vaccinationStatus", e.target.value)}
-        required
-      >
-        <option value="">-- Select --</option>
-        <option value="up_to_date">Up to Date</option>
-        <option value="partial">Partial</option>
-        <option value="not_vaccinated">Not Vaccinated</option>
-        <option value="unknown">Unknown</option>
-      </select>
+      {/* ✅ Vaccination Status — ONLY IF RABIES */}
+      {formData.priorityDiseases?.includes("rabies") && (
+        <>
+          <label>Rabies Vaccination Status *</label>
+          <select
+            value={formData.vaccinationStatus || ""}
+            onChange={(e) =>
+              updateFormData("vaccinationStatus", e.target.value)
+            }
+            required
+          >
+            <option value="">-- Select --</option>
+            <option value="up_to_date">Up to Date</option>
+            <option value="partial">Partial</option>
+            <option value="not_vaccinated">Not Vaccinated</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </>
+      )}
 
       {/* Ownership */}
       <label>Ownership *</label>
