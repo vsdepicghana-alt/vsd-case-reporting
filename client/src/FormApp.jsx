@@ -146,7 +146,7 @@ function FormApp() {
 
     const labEmails = {
       "Takoradi Veterinary Lab": "oseibright172@gmail.com",
-      "Kumasi Veterinary Lab": "owususekyeresmith@gmail.com",
+      "Kumasi Veterinary Lab": "randyntimyeboah@gmail.com",
       "Accra Veterinary Lab": "kutamemark@gmail.com",
       "Central Veterinary Lab Pong Tamale": "davidmedulla5@gmail.com",
     };
