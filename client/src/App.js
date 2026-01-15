@@ -10,7 +10,7 @@ import Login from "./components/Login";
 import OfficerSetup from "./components/OfficerSetup";
 import CaseSuccess from "./components/CaseSuccess";
 import Dashboard from "./components/Dashboard";   // ✅ NEW
-
+import SOPRepository from "./components/SOPRepository";
 // ===== Helper Functions =====
 
 const getUser = () => {
@@ -97,6 +97,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+         path="/sops"
+         element={
+            <ProtectedRoute>
+              <SOPRepository />
             </ProtectedRoute>
           }
         />
