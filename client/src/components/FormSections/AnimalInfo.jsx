@@ -1,11 +1,21 @@
 import React, { useEffect } from "react";
+import { diseaseConfig } from "../../config/diseaseConfig";
 
 const AnimalInfo = ({ formData, updateFormData }) => {
+  const selectedDisease = formData.priorityDiseases?.[0];
+
+  const allowedSpecies =
+    diseaseConfig[selectedDisease]?.species || [];
+
+  const requiresVaccination =
+    diseaseConfig[selectedDisease]?.requiresVaccination;
+
   // Handle checkbox (species)
   const handleSpeciesChange = (species, checked) => {
     const updated = checked
       ? [...(formData.species || []), species]
       : formData.species.filter((s) => s !== species);
+
     updateFormData("species", updated);
   };
 
@@ -15,14 +25,12 @@ const AnimalInfo = ({ formData, updateFormData }) => {
     updateFormData("ages", updatedAges);
   };
 
-  // 🔁 Clear vaccination status if Rabies is NOT selected
+  // 🔁 Clear vaccination if not required
   useEffect(() => {
-    if (!formData.priorityDiseases?.includes("rabies")) {
-      if (formData.vaccinationStatus) {
-        updateFormData("vaccinationStatus", "");
-      }
+    if (!requiresVaccination && formData.vaccinationStatus) {
+      updateFormData("vaccinationStatus", "");
     }
-  }, [formData.priorityDiseases, formData.vaccinationStatus, updateFormData]);
+  }, [requiresVaccination, formData.vaccinationStatus, updateFormData]);
 
   return (
     <section className="form-section">
@@ -31,28 +39,21 @@ const AnimalInfo = ({ formData, updateFormData }) => {
       {/* Species */}
       <label>Species *</label>
       <div className="checkbox-group">
-        {[
-          "cattle",
-          "goat",
-          "sheep",
-          "pig",
-          "dog",
-          "cat",
-          "poultry",
-          "others",
-        ].map((sp) => (
+        {allowedSpecies.map((sp) => (
           <label key={sp}>
             <input
               type="checkbox"
               checked={formData.species?.includes(sp) || false}
-              onChange={(e) => handleSpeciesChange(sp, e.target.checked)}
+              onChange={(e) =>
+                handleSpeciesChange(sp, e.target.checked)
+              }
             />
             {sp.charAt(0).toUpperCase() + sp.slice(1)}
           </label>
         ))}
       </div>
 
-      {/* If others */}
+      {/* If others (only if allowed) */}
       {formData.species?.includes("others") && (
         <>
           <label>If others, kindly specify *</label>
@@ -133,10 +134,10 @@ const AnimalInfo = ({ formData, updateFormData }) => {
           </>
         )}
 
-      {/* ✅ Vaccination Status — ONLY IF RABIES */}
-      {formData.priorityDiseases?.includes("rabies") && (
+      {/* ✅ Vaccination Status (Dynamic) */}
+      {requiresVaccination && (
         <>
-          <label>Rabies Vaccination Status *</label>
+          <label>Vaccination Status *</label>
           <select
             value={formData.vaccinationStatus || ""}
             onChange={(e) =>
