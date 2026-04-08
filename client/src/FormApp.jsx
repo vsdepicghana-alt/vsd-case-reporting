@@ -11,7 +11,7 @@ import PostMortemLesions from "./components/FormSections/PostMortemLesions";
 import SampleReferral from "./components/FormSections/SampleReferral";
 import emailjs from "@emailjs/browser";
 import "./styles.css";
-import { diseaseConfig } from "../../config/diseaseConfig";
+import { diseaseConfig } from "./config/diseaseConfig";
 
 function FormApp() {
   const navigate = useNavigate();
