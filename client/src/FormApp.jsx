@@ -166,7 +166,7 @@ function FormApp() {
     if (!caseRecord.caseID || caseRecord.caseID.trim() === "") {
       caseRecord.caseID = generateCaseID();
       updateFormData("caseID", caseRecord.caseID);
-    }
+    } 
 
     try {
       await emailjs.send(
