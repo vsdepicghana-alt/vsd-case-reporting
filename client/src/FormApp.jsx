@@ -11,6 +11,7 @@ import PostMortemLesions from "./components/FormSections/PostMortemLesions";
 import SampleReferral from "./components/FormSections/SampleReferral";
 import emailjs from "@emailjs/browser";
 import "./styles.css";
+import { diseaseConfig } from "../../config/diseaseConfig";
 
 function FormApp() {
   const navigate = useNavigate();
@@ -51,7 +52,6 @@ function FormApp() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
 
-  /** ✅ Netlify-safe stable update function */
   const updateFormData = useCallback((key, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -59,7 +59,6 @@ function FormApp() {
     }));
   }, []);
 
-  /** Generate Case ID */
   const generateCaseID = () => {
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
@@ -83,7 +82,6 @@ function FormApp() {
     return `${region}-${district}-${dateStr}-${String(newCount).padStart(3, "0")}`;
   };
 
-  /** Load Case by ID */
   const handleLoadCaseByID = (caseID) => {
     const storedCases = JSON.parse(localStorage.getItem("cases") || "{}");
     const caseData = storedCases[caseID];
@@ -94,38 +92,49 @@ function FormApp() {
       alert(`✅ Case ${caseID} loaded successfully.`);
       setCurrentStep(1);
     } else {
-      alert("❌ Case not found. Check the ID and try again.");
+      alert("❌ Case not found.");
     }
   };
 
-  /** Save case locally */
   const saveCase = (caseRecord) => {
     const storedCases = JSON.parse(localStorage.getItem("cases") || "{}");
     storedCases[caseRecord.caseID] = caseRecord;
     localStorage.setItem("cases", JSON.stringify(storedCases));
   };
 
-  /** Required fields */
+  // 🔥 CLEANED REQUIRED FIELDS (removed vaccination here)
   const requiredFields = {
     intro: ["officerId", "officerName", "jobDescription", "placeOfWork", "contactNumber"],
     general: ["dateReported", "priorityDiseases", "typeOfCase", "numberOfCases", "region", "district"],
-    animal: ["species", "vaccinationStatus", "ownership"],
+    animal: ["species", "ownership"],
     clinical: ["onsetDate", "caseClassification"],
   };
 
-  /** Validate each step */
+  /** ✅ FIXED VALIDATION */
   const validateStep = (stepId) => {
     if (stepId === "lab" && formData.placeOfWork !== "laboratory") {
       return true;
     }
 
-    const fields =
+    let fields =
       stepId === "lab"
         ? ["labSampleType", "labTest", "labResult"]
         : requiredFields[stepId] || [];
 
+    // 🔥 Dynamic vaccination logic
+    if (stepId === "animal") {
+      const selectedDisease = formData.priorityDiseases?.[0];
+      const requiresVaccination =
+        diseaseConfig[selectedDisease]?.requiresVaccination;
+
+      if (requiresVaccination) {
+        fields.push("vaccinationStatus");
+      }
+    }
+
     for (const field of fields) {
       const value = formData[field];
+
       const empty =
         value === undefined ||
         value === null ||
@@ -137,10 +146,10 @@ function FormApp() {
         return false;
       }
     }
+
     return true;
   };
 
-  /** Email referral to lab */
   const sendReferralEmail = async (caseRecord) => {
     if (!caseRecord.sendToLab || caseRecord.sendToLab.toLowerCase() !== "yes") return;
 
@@ -154,29 +163,26 @@ function FormApp() {
     const to_email = labEmails[caseRecord.selectedLab];
     if (!to_email) return;
 
-    // Ensure we ALWAYS have a CaseID
     if (!caseRecord.caseID || caseRecord.caseID.trim() === "") {
       caseRecord.caseID = generateCaseID();
       updateFormData("caseID", caseRecord.caseID);
     }
 
-    const payload = {
-      to_email,
-      case_id: caseRecord.caseID,
-      case_type: caseRecord.typeOfCase,
-      sample_type: caseRecord.sampleType,
-      district: caseRecord.district,
-      region: caseRecord.region,
-      officer_name: caseRecord.officerName,
-      contact_number: caseRecord.contactNumber,
-      lab_name: caseRecord.selectedLab,
-    };
-
     try {
       await emailjs.send(
         "service_b1tiwj6",
         "template_v4xu1qr",
-        payload,
+        {
+          to_email,
+          case_id: caseRecord.caseID,
+          case_type: caseRecord.typeOfCase,
+          sample_type: caseRecord.sampleType,
+          district: caseRecord.district,
+          region: caseRecord.region,
+          officer_name: caseRecord.officerName,
+          contact_number: caseRecord.contactNumber,
+          lab_name: caseRecord.selectedLab,
+        },
         "rLj4_afPujWyNgG-z"
       );
     } catch (err) {
@@ -184,82 +190,27 @@ function FormApp() {
     }
   };
 
-  /** Steps */
   const steps = [
-    {
-      id: "intro",
-      label: "Introduction",
-      component: (
-        <IntroAndOfficer
-          formData={formData}
-          updateFormData={updateFormData}
-          handleLoadCaseByID={handleLoadCaseByID}
-          readOnly={readOnly}
-        />
-      ),
-    },
-    {
-      id: "general",
-      label: "General Case Info",
-      component: <GeneralCase formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
-    },
-    {
-      id: "animal",
-      label: "Animal Information",
-      component: <AnimalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
-    },
-    {
-      id: "clinical",
-      label: "Clinical & Classification",
-      component: <ClinicalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
-    },
+    { id: "intro", label: "Introduction", component: <IntroAndOfficer formData={formData} updateFormData={updateFormData} handleLoadCaseByID={handleLoadCaseByID} readOnly={readOnly} /> },
+    { id: "general", label: "General Case Info", component: <GeneralCase formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
+    { id: "animal", label: "Animal Information", component: <AnimalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
+    { id: "clinical", label: "Clinical & Classification", component: <ClinicalInfo formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
 
     ...(formData.placeOfWork === "laboratory"
-      ? [
-          {
-            id: "lab",
-            label: "Lab & Diagnostics",
-            component: (
-              <LabDiagnostics
-                formData={formData}
-                updateFormData={updateFormData}
-                readOnly={false}
-              />
-            ),
-          },
-        ]
+      ? [{ id: "lab", label: "Lab & Diagnostics", component: <LabDiagnostics formData={formData} updateFormData={updateFormData} readOnly={false} /> }]
       : []),
 
-    {
-      id: "control",
-      label: "Control Measures",
-      component: <ControlMeasures formData={formData} updateFormData={updateFormData} readOnly={readOnly} />,
-    },
+    { id: "control", label: "Control Measures", component: <ControlMeasures formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> },
 
     ...(formData.placeOfWork !== "laboratory"
-      ? [
-          {
-            id: "referral",
-            label: "Sample Referral",
-            component: <SampleReferral formData={formData} updateFormData={updateFormData} />,
-          },
-        ]
+      ? [{ id: "referral", label: "Sample Referral", component: <SampleReferral formData={formData} updateFormData={updateFormData} /> }]
       : []),
 
     ...(formData.placeOfWork === "abattoir" || formData.placeOfWork === "laboratory"
-      ? [
-          {
-            id: "postmortem",
-            label: "Post Mortem Lesions",
-            component: (
-              <PostMortemLesions formData={formData} updateFormData={updateFormData} readOnly={readOnly} />
-            ),
-          },
-        ]
+      ? [{ id: "postmortem", label: "Post Mortem Lesions", component: <PostMortemLesions formData={formData} updateFormData={updateFormData} readOnly={readOnly} /> }]
       : []),
   ];
 
-  /** Navigation */
   const goNext = () => {
     const stepId = steps[currentStep].id;
     if (!validateStep(stepId)) return;
@@ -270,7 +221,6 @@ function FormApp() {
 
   const goBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
 
-  /** Submit */
   const handleSubmit = async () => {
     let caseID = formData.caseID;
 
@@ -285,11 +235,7 @@ function FormApp() {
     await sendReferralEmail(caseRecord);
 
     navigate("/case-success", {
-      state: {
-        caseID,
-        region: formData.region,
-        district: formData.district,
-      },
+      state: { caseID, region: formData.region, district: formData.district },
     });
   };
 
@@ -304,12 +250,8 @@ function FormApp() {
 
       <div className="wizard-nav">
         {currentStep > 0 && <button onClick={goBack}>← Back</button>}
-        {currentStep < steps.length - 1 && (
-          <button onClick={goNext}>Next →</button>
-        )}
-        {currentStep === steps.length - 1 && (
-          <button onClick={handleSubmit}>Submit Case</button>
-        )}
+        {currentStep < steps.length - 1 && <button onClick={goNext}>Next →</button>}
+        {currentStep === steps.length - 1 && <button onClick={handleSubmit}>Submit Case</button>}
       </div>
     </WizardLayout>
   );
